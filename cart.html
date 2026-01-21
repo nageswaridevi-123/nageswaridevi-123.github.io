@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Cart - Paint System{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">Shopping Cart</h1>
+
+{% if cart_items %}
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <div>
+        {% for item in cart_items %}
+        <div style="display: grid; grid-template-columns: 100px 1fr auto; gap: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; align-items: center;">
+            <div style="width: 100px; height: 100px; background: {{ item.product.color_code }}; border-radius: 10px; border: 1px solid #ddd;"></div>
+            
+            <div>
+                <h3>{{ item.product.name }}</h3>
+                <p style="color: #7f8c8d;">{{ item.product.brand.name }} - {{ item.product.color_name }}</p>
+                <p><strong>Size:</strong> {{ item.product.size }}</p>
+                <p style="color: #27ae60; font-size: 1.2rem; font-weight: bold;">₹{{ item.product.price }}</p>
+            </div>
+
+            <div style="text-align: right;">
+                <form method="POST" action="{% url 'update_cart' item.id %}" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="decrease" class="btn" style="padding: 0.3rem 0.8rem; background: #95a5a6;">-</button>
+                    <span style="font-size: 1.2rem; font-weight: bold; min-width: 30px; text-align: center;">{{ item.quantity }}</span>
+                    <button type="submit" name="action" value="increase" class="btn" style="padding: 0.3rem 0.8rem;">+</button>
+                </form>
+                <br>
+                <form method="POST" action="{% url 'update_cart' item.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="remove" class="btn btn-danger" style="padding: 0.3rem 1rem;">Remove</button>
+                </form>
+                <p style="margin-top: 0.5rem; font-weight: bold;">Total: ₹{{ item.get_total_price }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; height: fit-content;">
+        <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+        <div style="border-bottom: 1px solid #ddd; padding-bottom: 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Subtotal:</span>
+                <span>₹{{ total }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Delivery:</span>
+                <span style="color: #27ae60;">FREE</span>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem;">
+            <span>Total:</span>
+            <span style="color: #27ae60;">₹{{ total }}</span>
+        </div>
+        <a href="{% url 'checkout' %}" class="btn" style="width: 100%; text-align: center; font-size: 1.2rem;">Proceed to Checkout</a>
+        <a href="{% url 'catalog' %}" class="btn" style="width: 100%; text-align: center; margin-top: 0.5rem; background: #95a5a6;">Continue Shopping</a>
+    </div>
+</div>
+{% else %}
+<div style="text-align: center; padding: 3rem;">
+    <p style="font-size: 1.5rem; color: #7f8c8d; margin-bottom: 2rem;">Your cart is empty</p>
+    <a href="{% url 'catalog' %}" class="btn">Browse Products</a>
+</div>
+{% endif %}
+{% endblock %}

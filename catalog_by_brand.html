@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Catalog by Brand{% endblock %}
+
+{% block content %}
+<h1>Paint Catalog — Brands & Colours</h1>
+
+{% for bp in brand_products %}
+  <section style="margin:2rem 0; padding:1rem; border-radius:8px; border:1px solid #eee;">
+    <div style="display:flex;flex-wrap:wrap; align-items:center; gap:12px;">
+      {% if bp.brand.logo %}
+        <img src="{{ bp.brand.logo.url }}" alt="{{ bp.brand.name }}" style="width:72px; height:72px; object-fit:contain; border-radius:6px;">
+      {% else %}
+        <div style="width:72px; height:72px; display:flex; align-items:center; justify-content:center; background:#f5f5f5; border-radius:6px;">{{ bp.brand.name|slice:":1" }}</div>
+      {% endif %}
+      <h2 style="margin:0;">{{ bp.brand.name }}</h2>
+      <div style="margin-left:auto; color:#7f8c8d;">{{ bp.products.count }} colours</div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;">
+      {% for p in bp.products %}
+      <div style="width:160px; border:1px solid #eee; border-radius:8px; padding:8px; text-align:center;">
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.color_name }}" style="width:120px; height:80px; object-fit:cover; border-radius:6px;">
+        {% else %}
+          <!-- fallback: colored box -->
+          <div style="width:120px; height:80px; border-radius:6px; background: {{ p.color_code }}; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);"></div>
+        {% endif %}
+        <div style="margin-top:8px; font-weight:600;">{{ p.color_name }}</div>
+        <div style="font-size:13px; color:#7f8c8d;">{{ p.color_code }}</div>
+        <div style="margin-top:6px; color:#2c3e50;">{{ p.size }} — ₹{{ p.price }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+
+{% endblock %}

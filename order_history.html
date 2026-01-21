@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Order History - Paint System{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">Order History</h1>
+
+{% if orders %}
+    {% for order in orders %}
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <div>
+                <h3 style="color: #2c3e50;">Order #{{ order.order_number }}</h3>
+                <p style="color: #7f8c8d;">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+            </div>
+            <div style="text-align: right;">
+                <span style="padding: 0.5rem 1rem; background:
+                    {% if order.status == 'delivered' %}#27ae60
+                    {% elif order.status == 'out_for_delivery' %}#3498db
+                    {% elif order.status == 'cancelled' %}#e74c3c
+                    {% else %}#f39c12{% endif %};
+                    color: white; border-radius: 5px; font-weight: bold;">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #ddd; padding-top: 1rem; margin-bottom: 1rem;">
+            <p><strong>Items:</strong></p>
+            {% for item in order.items.all %}
+                <p style="color: #7f8c8d; margin-left: 1rem;">{{ item.product.name }} ({{ item.product.size }}) × {{ item.quantity }}</p>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <p style="font-size: 1.2rem;"><strong>Total: ₹{{ order.total_amount }}</strong></p>
+                <p style="color: #7f8c8d; font-size: 0.9rem;">Payment: {{ order.get_payment_method_display }}</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'order_detail' order.id %}" class="btn">View Details</a>
+                {% if order.status == 'out_for_delivery' or order.status == 'confirmed' %}
+                    <a href="{% url 'track_order' order.id %}" class="btn" style="background: #3498db;">Track Order</a>
+                {% endif %}
+                {% if order.status == 'delivered' %}
+                    {% if not order.feedback %}
+                        <a href="{% url 'feedback' order.id %}" class="btn" style="background: #f39c12;">Leave Feedback</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.5rem; color: #7f8c8d; margin-bottom: 2rem;">No orders yet</p>
+        <a href="{% url 'catalog' %}" class="btn">Start Shopping</a>
+    </div>
+{% endif %}
+{% endblock %}

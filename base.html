@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Paint Estimation System{% endblock %}</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; line-height: 1.6; }
+            nav { background: #2c3e50; color: white; padding: 1rem; }
+            nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+            nav a { color: white; text-decoration: none; }
+            nav a:hover { color: #3498db; }
+            .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+            .messages { padding: 1rem; margin: 1rem 0; border-radius: 5px; }
+            .messages.success { background: #d4edda; color: #155724; }
+            .messages.error { background: #f8d7da; color: #721c24; }
+            .btn { padding: 0.5rem 1.5rem; background: #3498db; color: white; border: none; cursor: pointer; border-radius: 5px; text-decoration: none; display: inline-block; }
+            .btn:hover { background: #2980b9; }
+            .btn-danger { background: #e74c3c; }
+            .btn-danger:hover { background: #c0392b; }
+            footer { background: #2c3e50; color: white; text-align: center; padding: 2rem; margin-top: 3rem; }
+             .featured-section {
+        background: linear-gradient(135deg, #d0e4f7, #a9c9e9);
+        padding: 2.5rem;
+        border-radius: 12px;
+
+
+}
+    }
+        </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}"><strong>Paint System</strong></a></li>
+            <li><a href="{% url 'catalog' %}">Catalog</a></li>
+            <li><a href="{% url 'estimator' %}">Estimator</a></li>
+            <li><a href="{% url 'wall_preview_upload' %}">Wall Preview</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'cart' %}">Cart</a></li>
+                <li><a href="{% url 'order_history' %}">Orders</a></li>
+                <li><a href="{% url 'profile' %}">Profile</a></li>
+                <li style="margin-left: auto;"><a href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+                <li style="margin-left: auto;"><a href="{% url 'login' %}">Login</a></li>
+                <li><a href="{% url 'register' %}">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Paint Estimation and Ordering System</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

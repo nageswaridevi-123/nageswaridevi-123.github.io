@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Paint Estimator - Paint System{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+
+    <h1 style="margin-bottom: 2rem;">Paint Estimator</h1>
+    <p style="margin-bottom: 2rem; color: #7f8c8d;">Calculate how much paint you need for your room</p>
+
+    <form method="POST" style="background: #f8f9fa; padding: 2rem; border-radius: 10px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Room Length (meters):</strong></label>
+            <input type="number" step="0.01" name="length" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Room Breadth (meters):</strong></label>
+            <input type="number" step="0.01" name="breadth" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Room Height (meters):</strong></label>
+            <input type="number" step="0.01" name="height" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Number of Coats:</strong></label>
+            <input type="number" name="coats" value="2" min="1" max="5" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Coverage per Litre (sq meters):</strong></label>
+            <input type="number" step="0.01" name="coverage" value="10.0" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+            <small style="color: #7f8c8d;">Default: 10 sq m per litre</small>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; font-size: 1.2rem;">Calculate</button>
+    </form>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #e8f5e9; border-radius: 10px;">
+        <h3>How it works:</h3>
+        <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+            <li>Enter your room dimensions</li>
+            <li>Choose number of coats (typically 2)</li>
+            <li>We calculate total wall area</li>
+            <li>Get exact paint quantity needed</li>
+            <li>Optimized can split (20L, 10L, 4L, 1L)</li>
+        </ul>
+    </div>
+    </div>
+{% endblock %}

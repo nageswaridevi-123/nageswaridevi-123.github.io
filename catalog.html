@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Catalog - Paint System{% endblock %}
+
+{% block content %}
+<h1>Paint Catalog</h1>
+
+<div style="margin: 2rem 0; padding: 1rem; background: #BFD8B8; border-radius: 5px;">
+    <form method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+        <div>
+            <label>Search:</label>
+            <input type="text" name="search" placeholder="Search paints..." value="{{ request.GET.search }}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div>
+            <label>Brand:</label>
+            <select name="brand" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Brands</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id }}" {% if request.GET.brand == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Finish:</label>
+            <select name="finish" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Finishes</option>
+                <option value="matte" {% if request.GET.finish == "matte" %}selected{% endif %}>Matte</option>
+                <option value="satin" {% if request.GET.finish == "satin" %}selected{% endif %}>Satin</option>
+                <option value="glossy" {% if request.GET.finish == "glossy" %}selected{% endif %}>Glossy</option>
+                <option value="semi_glossy" {% if request.GET.finish == "semi_glossy" %}selected{% endif %}>Semi-Glossy</option>
+            </select>
+        </div>
+        <div>
+            <label>Size:</label>
+            <select name="size" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Sizes</option>
+                <option value="1L" {% if request.GET.size == "1L" %}selected{% endif %}>1L</option>
+                <option value="4L" {% if request.GET.size == "4L" %}selected{% endif %}>4L</option>
+                <option value="10L" {% if request.GET.size == "10L" %}selected{% endif %}>10L</option>
+                <option value="20L" {% if request.GET.size == "20L" %}selected{% endif %}>20L</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Filter</button>
+        <a href="{% url 'catalog' %}" class="btn" style="background: #95a5a6;">Clear</a>
+    </form>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 2rem;">
+    {% for product in products %}
+    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 1rem; background: white;">
+        <div style="width: 100%; height: 200px; background: {{ product.color_code }}; border-radius: 5px; margin-bottom: 1rem;"></div>
+        <h3 style="margin: 0.5rem 0;">{{ product.name }}</h3>
+        <p style="color: #7f8c8d;">{{ product.brand.name }}</p>
+        <p><strong>Color:</strong> {{ product.color_name }}</p>
+        <p><strong>Finish:</strong> {{ product.get_finish_display }}</p>
+        <p><strong>Size:</strong> {{ product.size }}</p>
+        <p style="color: #27ae60; font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">₹{{ product.price }}</p>
+        <a href="{% url 'product_detail' product.id %}" class="btn" style="width: 100%; text-align: center;">View Details</a>
+    </div>
+    {% empty %}
+    <p>No products found.</p>
+    {% endfor %}
+</div>
+{% endblock %}

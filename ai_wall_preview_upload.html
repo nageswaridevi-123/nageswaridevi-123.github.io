@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Wall Preview - Upload{% endblock %}
+
+{% block content %}
+<style>
+    .upload-container { max-width: 600px; margin: 2rem auto; }
+    .upload-box { border: 3px dashed #3498db; border-radius: 15px; padding: 3rem 2rem; text-align: center; cursor: pointer; background: #f8f9fa; }
+    .upload-box:hover { border-color: #2980b9; background: #e9ecef; }
+    .error { background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; }
+</style>
+
+<div class="upload-container">
+    <h1>🤖 AI Wall Preview</h1>
+    <p style="color: #7f8c8d; margin-bottom: 2rem;">Upload your room photo for automatic wall detection</p>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📸</div>
+            <h2 style="color: #3498db; margin-bottom: 0.5rem;">Click to Upload Wall Image</h2>
+            <p style="color: #7f8c8d;">JPG, PNG (Max 5MB)</p>
+        </div>
+
+        <input type="file" id="fileInput" name="wall_image" accept="image/*" required style="display: none;" onchange="this.form.submit()">
+    </form>
+
+    {% if recent_previews %}
+    <div style="margin-top: 3rem;">
+        <h3>Recent Previews</h3>
+        {% for prev in recent_previews %}
+        <div style="padding: 1rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem;">
+            <p>Uploaded: {{ prev.created_at|date:"d M Y, h:i A" }}</p>
+            <a href="{% url 'wall_preview_edit' prev.id %}" class="btn">Edit Again</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

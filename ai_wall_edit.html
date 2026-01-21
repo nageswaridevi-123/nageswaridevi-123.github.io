@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Wall Preview - Edit{% endblock %}
+
+{% block content %}
+<style>
+    .preview-container { display: grid; grid-template-columns: 280px 1fr; gap: 2rem; margin-top: 2rem; }
+    .control-panel { background: #f8f9fa; padding: 1.5rem; border-radius: 10px; height: fit-content; position: sticky; top: 20px; }
+    .color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; max-height: 400px; overflow-y: auto; margin: 1rem 0; }
+    .color-swatch { width: 100%; height: 70px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; transition: all 0.3s; }
+    .color-swatch:hover { border-color: #3498db; transform: scale(1.05); }
+    .color-swatch.active { border-color: #27ae60; box-shadow: 0 0 15px rgba(39, 174, 96, 0.5); }
+    .method-btn { padding: 0.5rem 1rem; margin: 0.3rem; border: 2px solid #ddd; background: white; border-radius: 5px; cursor: pointer; }
+    .method-btn.active { background: #3498db; color: white; border-color: #3498db; }
+    .preview-area { background: white; border-radius: 10px; padding: 1.5rem; }
+    #previewImage { max-width: 100%; border-radius: 10px; display: block; margin: 0 auto; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 1rem auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading { display: none; text-align: center; padding: 2rem; }
+</style>
+
+<h1>🎨 AI Wall Preview</h1>
+
+<div class="preview-container">
+    <div class="control-panel">
+        <h3>Detection Method</h3>
+        <div>
+            <button class="method-btn active" data-method="color_based" onclick="selectMethod(this)">Color Based</button>
+            <button class="method-btn" data-method="grabcut" onclick="selectMethod(this)">GrabCut</button>
+        </div>
+
+        <h3 style="margin-top: 2rem;">Select Color</h3>
+        <div class="color-grid">
+            {% for color in colors %}
+            <div class="color-swatch"
+                 style="background: {{ color.color_code }};"
+                 data-color="{{ color.color_code }}"
+                 title="{{ color.color_name }}"
+                 onclick="applyColor('{{ color.color_code }}', this)"></div>
+            {% endfor %}
+        </div>
+
+        <button onclick="showMask()" class="btn" style="width: 100%; margin-top: 1rem;">👁️ Show Mask</button>
+        <button onclick="resetPreview()" class="btn btn-danger" style="width: 100%; margin-top: 0.5rem;">Reset</button>
+    </div>
+
+    <div class="preview-area">
+        <div id="loadingIndicator" class="loading">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <img id="previewImage" src="{{ preview.wall_image.url }}" alt="Wall Preview">
+        <p id="statusText" style="text-align: center; margin-top: 1rem; color: #7f8c8d;">Select a color to preview</p>
+    </div>
+</div>
+
+<script>
+const previewId = {{ preview.id }};
+let currentMethod = 'color_based';
+const originalImageUrl = '{{ preview.wall_image.url }}';
+let isProcessing = false;
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function selectMethod(button) {
+    document.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    currentMethod = button.dataset.method;
+}
+
+async function applyColor(colorHex, element) {
+    if (isProcessing) return;
+
+    document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+
+    isProcessing = true;
+    document.getElementById('loadingIndicator').style.display = 'block';
+    document.getElementById('statusText').textContent = 'Applying color...';
+
+    try {
+        const formData = new FormData();
+        formData.append('color_hex', colorHex);
+        formData.append('method', currentMethod);
+
+        const response = await fetch(`/api/ai-paint/${previewId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('previewImage').src = data.painted_url + '?t=' + Date.now();
+            document.getElementById('statusText').textContent = '✓ Color applied!';
+            document.getElementById('statusText').style.color = '#27ae60';
+        } else {
+            throw new Error(data.error || 'Failed to apply color');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+        document.getElementById('statusText').textContent = '✗ Error';
+        document.getElementById('statusText').style.color = '#e74c3c';
+    } finally {
+        isProcessing = false;
+        document.getElementById('loadingIndicator').style.display = 'none';
+    }
+}
+
+async function showMask() {
+    if (isProcessing) return;
+
+    isProcessing = true;
+    document.getElementById('loadingIndicator').style.display = 'block';
+    document.getElementById('statusText').textContent = 'Generating mask...';
+
+    try {
+        const response = await fetch(`/api/wall-mask/${previewId}/?method=${currentMethod}`);
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('previewImage').src = data.mask_url + '?t=' + Date.now();
+            document.getElementById('statusText').textContent = '👁️ Mask (white = wall)';
+            document.getElementById('statusText').style.color = '#9b59b6';
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        isProcessing = false;
+        document.getElementById('loadingIndicator').style.display = 'none';
+    }
+}
+
+function resetPreview() {
+    document.getElementById('previewImage').src = originalImageUrl + '?t=' + Date.now();
+    document.getElementById('statusText').textContent = 'Original image';
+    document.getElementById('statusText').style.color = '#7f8c8d';
+    document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('active'));
+}
+</script>
+{% endblock %}
+```
+
+### `requirements.txt`
+```
+# ADD these packages (append to existing requirements.txt)
+opencv-python>=4.8.0
+opencv-contrib-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0

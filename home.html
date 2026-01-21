@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Paint System{% endblock %}
+
+{% block content %}
+
+<div style="
+    text-align: center;
+    padding: 6rem 0;
+    background-image: url('{% static 'images/homeimage1.jpg' %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+">
+
+    <h1 style="font-size: 4rem; color: #000000;">SAIT AGENCY</h1>
+    <p style="
+    font-size: 1.5rem;
+    color: #fff;
+    display: inline-block;
+    background: rgba(0,0,0,0.4);
+    padding: 10px 20px;
+    border-radius: 8px;
+">
+Find the perfect paint for your home
+</p>
+
+    <a href="{% url 'catalog' %}" class="btn" style="margin: 1rem;">Browse Catalog</a>
+    <a href="{% url 'estimator' %}" class="btn" style="background: #27ae60;">Calculate Paint</a>
+</div>
+
+<div style="margin: 3rem 0;"><section class="featured-section">
+    <h2 style="margin-bottom: 2rem;">Featured Brands</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+        {% for brand in brands %}
+        <div style="padding: 1.5rem; background: #ecf0f1; border-radius: 10px; text-align: center;">
+            {% if brand.logo %}
+                <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" style="max-width: 100px; height: auto;">
+            {% endif %}
+            <h3>{{ brand.name}}</h3>
+            </div>
+
+        {% endfor %}
+    </div>
+ </section>
+
+</div>
+
+<div style="margin: 3rem 0;">
+    <div style="margin: 3rem 0;">
+
+    <h2 style="margin-bottom: 2rem;">Featured Products</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+        {% for product in products %}
+        <div style="border: 1px solid #ddd; border-radius: 10px; padding: 1rem; background: white;">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
+            {% else %}
+                <div style="width: 100%; height: 200px; background: {{ product.color_code }}; border-radius: 5px;"></div>
+            {% endif %}
+            <h3 style="margin: 1rem 0;">{{ product.name }}</h3>
+            <p>{{ product.brand.name }} - {{ product.color_name }}</p>
+            <p style="color: #27ae60; font-size: 1.5rem; font-weight: bold;">₹{{ product.price }}</p>
+            <a href="{% url 'product_detail' product.id %}" class="btn" style="width: 100%; text-align: center;">View Details</a>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+{% endblock %}
+</div>
+

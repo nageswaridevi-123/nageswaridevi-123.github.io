@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Estimation Results - Paint System{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <h1 style="margin-bottom: 2rem;">Paint Estimation Results</h1>
+
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+        <h2 style="color: #2c3e50; margin-bottom: 1rem;">Room Details</h2>
+        <p><strong>Length:</strong> {{ estimation.room_length }} m</p>
+        <p><strong>Breadth:</strong> {{ estimation.room_breadth }} m</p>
+        <p><strong>Height:</strong> {{ estimation.room_height }} m</p>
+        <p><strong>Number of Coats:</strong> {{ estimation.number_of_coats }}</p>
+    </div>
+
+    <div style="background: #e3f2fd; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+        <h2 style="color: #1976d2; margin-bottom: 1rem;">Calculation Results</h2>
+        <p style="font-size: 1.2rem;"><strong>Total Wall Area:</strong> {{ estimation.total_area|floatformat:2 }} sq meters</p>
+        <p style="font-size: 1.5rem; color: #27ae60; font-weight: bold;"><strong>Paint Required:</strong> {{ estimation.litres_needed|floatformat:2 }} Litres</p>
+    </div>
+
+    <div style="background: #fff3e0; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+        <h2 style="color: #f57c00; margin-bottom: 1rem;">Recommended Can Split</h2>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+            {% if estimation.cans_20l > 0 %}
+            <div style="padding: 1rem; background: white; border-radius: 5px; text-align: center;">
+                <p style="font-size: 2rem; font-weight: bold; color: #3498db;">{{ estimation.cans_20l }}</p>
+                <p>20 Litre Cans</p>
+            </div>
+            {% endif %}
+            {% if estimation.cans_10l > 0 %}
+            <div style="padding: 1rem; background: white; border-radius: 5px; text-align: center;">
+                <p style="font-size: 2rem; font-weight: bold; color: #9b59b6;">{{ estimation.cans_10l }}</p>
+                <p>10 Litre Cans</p>
+            </div>
+            {% endif %}
+            {% if estimation.cans_4l > 0 %}
+            <div style="padding: 1rem; background: white; border-radius: 5px; text-align: center;">
+                <p style="font-size: 2rem; font-weight: bold; color: #e67e22;">{{ estimation.cans_4l }}</p>
+                <p>4 Litre Cans</p>
+            </div>
+            {% endif %}
+            {% if estimation.cans_1l > 0 %}
+            <div style="padding: 1rem; background: white; border-radius: 5px; text-align: center;">
+                <p style="font-size: 2rem; font-weight: bold; color: #e74c3c;">{{ estimation.cans_1l }}</p>
+                <p>1 Litre Cans</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'catalog' %}" class="btn" style="flex: 1; text-align: center;">Browse Paints</a>
+        <a href="{% url 'estimator' %}" class="btn" style="flex: 1; text-align: center; background: #95a5a6;">New Estimation</a>
+    </div>
+</div>
+{% endblock %}

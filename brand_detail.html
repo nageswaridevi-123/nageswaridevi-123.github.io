@@ -1,0 +1,45 @@
+<!-- paint_app/templates/brand_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ brand.name }} - Products{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{% url 'brands' %}" style="color: #3498db;">← Back to Brands</a>
+    <h1 style="margin-top: 1rem;">{{ brand.name }}</h1>
+    <p style="color: #7f8c8d;">{{ brand.description }}</p>
+</div>
+
+<!-- Sorting Options -->
+<div style="margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+    <label><strong>Sort by:</strong></label>
+    <select onchange="location.href='?sort=' + this.value" style="margin-left: 1rem; padding: 0.5rem; border-radius: 5px;">
+         <option value="name"> {% if sort_by == 'name' %}selected{% endif %}>Name</option>
+    <option value="price_low"> {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+    <option value="price_high"> {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+    <option value="popularity"> {% if sort_by == 'popularity' %}selected{% endif %}>Popularity</option>
+    </select>
+</div>
+
+<!-- Products Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem;">
+    {% for product in products %}
+    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 1rem; background: white;">
+        <div style="width: 100%; height: 200px; background: {{ product.color_code }}; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #ddd;"></div>
+
+        {% if product.featured %}
+        <span style="background: #f39c12; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem;">⭐ Featured</span>
+        {% endif %}
+
+        <h3 style="margin: 0.5rem 0;">{{ product.name }}</h3>
+        <p style="color: #7f8c8d;">{{ product.color_name }}</p>
+        <p><strong>Finish:</strong> {{ product.get_finish_display }}</p>
+        <p><strong>Size:</strong> {{ product.size }}</p>
+        <p style="color: #27ae60; font-size: 1.5rem; font-weight: bold;">₹{{ product.price }}</p>
+        <a href="{% url 'product_detail' product.id %}" class="btn" style="width: 100%; text-align: center;">View Details</a>
+    </div>
+    {% empty %}
+    <p style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #7f8c8d;">No products found for this brand.</p>
+    {% endfor %}
+</div>
+{% endblock %}

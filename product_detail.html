@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Paint System{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem;">
+    <div>
+        <div style="width: 100%; height: 400px; background: {{ product.color_code }}; border-radius: 10px; border: 1px solid #ddd;"></div>
+    </div>
+    <div>
+        <h1>{{ product.name }}</h1>
+        <h3 style="color: #7f8c8d; margin-bottom: 1rem;">{{ product.brand.name }}</h3>
+        
+        <div style="margin: 2rem 0;">
+            <p style="margin: 0.5rem 0;"><strong>Color:</strong> {{ product.color_name }} ({{ product.color_code }})</p>
+            <p style="margin: 0.5rem 0;"><strong>Finish:</strong> {{ product.get_finish_display }}</p>
+            <p style="margin: 0.5rem 0;"><strong>Size:</strong> {{ product.size }}</p>
+            <p style="margin: 0.5rem 0;"><strong>Coverage:</strong> {{ product.coverage_per_litre }} sq m per litre</p>
+            <p style="margin: 0.5rem 0;"><strong>Stock:</strong> {{ product.stock }} units available</p>
+        </div>
+
+        {% if product.description %}
+        <div style="margin: 2rem 0; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+            <p>{{ product.description }}</p>
+        </div>
+        {% endif %}
+
+        <p style="color: #27ae60; font-size: 2.5rem; font-weight: bold; margin: 2rem 0;">₹{{ product.price }}</p>
+
+        {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'add_to_cart' product.id %}">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                <label><strong>Quantity:</strong></label>
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; width: 80px;">
+            </div>
+            <button type="submit" class="btn" style="width: 100%; font-size: 1.2rem;">Add to Cart</button>
+        </form>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn" style="width: 100%; text-align: center; font-size: 1.2rem;">Login to Purchase</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

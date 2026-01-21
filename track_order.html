@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Order - Paint System{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">Track Order #{{ order.order_number }}</h1>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
+        <h3>Order Status</h3>
+        <p style="font-size: 1.2rem; color: #3498db; margin-top: 1rem;">{{ order.get_status_display }}</p>
+        {% if tracking.delivery_person_name %}
+            <p style="margin-top: 1rem;"><strong>Delivery Person:</strong> {{ tracking.delivery_person_name }}</p>
+            <p><strong>Contact:</strong> {{ tracking.delivery_person_mobile }}</p>
+        {% endif %}
+    </div>
+
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
+        <h3>Delivery Address</h3>
+        <p style="margin-top: 1rem; color: #7f8c8d;">{{ order.delivery_address }}</p>
+        <p style="color: #7f8c8d;">Pincode: {{ order.delivery_pincode }}</p>
+    </div>
+</div>
+
+<div style="background: #f8f9fa; padding: 2rem; border-radius: 10px;">
+    <h2 style="margin-bottom: 1rem;">Live Location Tracking</h2>
+    <div id="map" style="width: 100%; height: 500px; background: #ecf0f1; border-radius: 10px; position: relative;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <p style="font-size: 1.2rem; color: #7f8c8d; margin-bottom: 1rem;">Delivery tracking map will appear here</p>
+            <p style="color: #7f8c8d;">Current Location: <span id="locationText">Waiting for update...</span></p>
+        </div>
+    </div>
+    <p style="margin-top: 1rem; color: #7f8c8d; text-align: center;">
+        <span id="lastUpdate">Last updated: {{ tracking.last_updated|date:"h:i A" }}</span>
+    </p>
+</div>
+
+<script>
+let map;
+let deliveryMarker;
+const orderId = {{ order.id }};
+
+// Google Maps load aana apram call aagura function
+function initMap() {
+    // First time load / every 10 seconds update
+    updateLocation();
+    setInterval(updateLocation, 10000);
+}
+
+async function updateLocation() {
+    try {
+        const response = await fetch(`/api/delivery/get/${orderId}/`);
+        const data = await response.json();
+
+        if (data.lat && data.lng) {
+            // Text update
+            document.getElementById('locationText').textContent =
+                `Lat: ${data.lat.toFixed(6)}, Lng: ${data.lng.toFixed(6)}`;
+            document.getElementById('lastUpdate').textContent =
+                `Last updated: ${new Date().toLocaleTimeString()}`;
+
+            const pos = { lat: data.lat, lng: data.lng };
+
+            // Map create panna / move panna
+            if (!map) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 15,
+                    center: pos,
+                });
+            } else {
+                map.setCenter(pos);
+            }
+
+            // Marker create panna / move panna
+            if (!deliveryMarker) {
+                deliveryMarker = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    title: 'Delivery Person',
+                });
+            } else {
+                deliveryMarker.setPosition(pos);
+            }
+        } else {
+            document.getElementById('locationText').textContent =
+                'Location not available yet';
+        }
+    } catch (error) {
+        console.error('Error fetching location:', error);
+    }
+}
+</script>
+
+<!-- YOUR_API_KEY place-la un key podanum -->
+<script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNJ0K4xz5NfhHfH4VamCKS7paWexmDWr8&callback=initMap">
+</script>
+
+{% endblock %}
+
+
+
+
+
+

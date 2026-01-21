@@ -1,0 +1,74 @@
+<!-- paint_app/templates/admin_featured.html -->
+{% extends 'base.html' %}
+
+{% block title %}Manage Featured Products{% endblock %}
+
+{% block content %}
+<h1>Manage Featured Products</h1>
+<p style="color: #7f8c8d;">Toggle featured status for products (max 3 per brand recommended)</p>
+
+{% for brand, products in products_by_brand.items %}
+<div style="margin: 2rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 10px;">
+    <h2>{{ brand.name }}</h2>
+
+    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+        {% for product in products %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 5px;">
+            <div>
+                <strong>{{ product.name }}</strong> - {{ product.color_name }} ({{ product.size }})
+            </div>
+            <button onclick="toggleFeatured({{ product.id }})"
+                    id="btn-{{ product.id }}"
+                    class="btn {% if product.featured %}btn-danger{% endif %}"
+                    style="min-width: 150px;">
+                {% if product.featured %}✓ Featured{% else %}Mark Featured{% endif %}
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function toggleFeatured(productId) {
+    try {
+        const response = await fetch(`/api/product/${productId}/toggle-featured/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const btn = document.getElementById(`btn-${productId}`);
+            if (data.featured) {
+                btn.textContent = '✓ Featured';
+                btn.classList.add('btn-danger');
+            } else {
+                btn.textContent = 'Mark Featured';
+                btn.classList.remove('btn-danger');
+            }
+        }
+    } catch (error) {
+        alert('Error toggling featured status');
+    }
+}
+</script>
+{% endblock %}

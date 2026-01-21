@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Details - Paint System{% endblock %}
+
+{% block content %}
+
+<div class="order-page">
+
+    <!-- ✅ Top status card -->
+    <div class="order-card order-status-card">
+        <div class="status-icon">✅</div>
+        <div class="status-text">
+            <h2>Order Confirmed!</h2>
+            {% if delivery_message %}
+                <p class="status-subtitle">{{ delivery_message }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ✅ Basic order info -->
+    <div class="order-card">
+        <div class="order-header">
+            <div>
+                <p class="order-label">Order Number</p>
+                <h3>#{{ order.order_number|default:order.id }}</h3>
+            </div>
+            <div class="order-status-badge
+                {% if order.status == 'delivered' %} delivered
+                {% elif order.status == 'out_for_delivery' %} out-for-delivery
+                {% elif order.status == 'cancelled' %} cancelled
+                {% else %} pending {% endif %}">
+                {{ order.get_status_display }}
+            </div>
+        </div>
+
+        <div class="order-meta-grid">
+            <div>
+                <p class="order-label">Order Date</p>
+                <p>{{ order.created_at|date:"d M, Y h:i A" }}</p>
+            </div>
+            <div>
+                <p class="order-label">Payment Method</p>
+                <p>{{ order.get_payment_method_display }}</p>
+            </div>
+            <div>
+                <p class="order-label">Payment Status</p>
+                <p class="{% if order.payment_status %}text-success{% else %}text-warning{% endif %}">
+                    {% if order.payment_status %}Paid{% else %}Pending{% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="order-label">Expected Delivery</p>
+                <p class="text-strong">
+                    {{ order.expected_delivery_date|date:"d M, Y" }}
+                </p>
+            </div>
+            <div>
+                <p class="order-label">Total Amount</p>
+                <p class="text-strong">₹{{ order.total_amount }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Address + contact -->
+    <div class="order-grid-2">
+        <div class="order-card">
+            <h4 class="section-title">Delivery Address</h4>
+            <p class="order-label">Address</p>
+            <p>{{ order.delivery_address }}</p>
+
+            <div class="two-cols">
+                <div>
+                    <p class="order-label">Mobile</p>
+                    <p>{{ order.delivery_mobile }}</p>
+                </div>
+                <div>
+                    <p class="order-label">Pincode</p>
+                    <p>{{ order.delivery_pincode }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback / CTA or extra info இடம்பிடிக்கலாம் -->
+        <div class="order-card">
+            <h4 class="section-title">Order Actions</h4>
+            <p class="order-label">Track your order</p>
+            {% if order.status != 'delivered' and order.status != 'cancelled' %}
+                <a href="{% url 'track_order' order.id %}" class="btn btn-primary w-100">
+                    Track Order
+                </a>
+            {% else %}
+                <p class="text-muted">Tracking not available for cancelled / delivered orders.</p>
+            {% endif %}
+
+            {% if order.status == 'delivered' %}
+                <hr>
+                {% if order.feedback %}
+                    <p class="order-label">Your Rating</p>
+                    <p>
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= order.feedback.rating %}⭐{% endif %}
+                        {% endfor %}
+                    </p>
+                    {% if order.feedback.comment %}
+                        <p class="order-label">Your Comment</p>
+                        <p class="text-muted">{{ order.feedback.comment }}</p>
+                    {% endif %}
+                {% else %}
+                    <p class="order-label">Feedback</p>
+                    <p class="text-muted mb-2">How was your experience with this order?</p>
+                    <a href="{% url 'feedback' order.id %}" class="btn btn-warning w-100">
+                        Leave Feedback
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ✅ Items table -->
+    <div class="order-card">
+        <h4 class="section-title">Order Items</h4>
+
+        <div class="table-wrapper">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Brand</th>
+                        <th>Color</th>
+                        <th>Size</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.product.brand.name }}</td>
+                        <td>
+                            {% if item.product.color_code %}
+                                <span class="color-pill"
+                                      style="background-color: {{ item.product.color_code }};">
+                                    {{ item.product.color_name }}
+                                </span>
+                            {% else %}
+                                {{ item.product.color_name }}
+                            {% endif %}
+                        </td>
+                        <td>{{ item.product.size }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ item.price }}</td>
+                        <td>₹{{ item.get_total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="6" class="text-right">Total</th>
+                        <th>₹{{ order.total_amount }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- ✅ Delivery timeline -->
+    <div class="order-card">
+        <h4 class="section-title">Delivery Timeline</h4>
+
+        <div class="delivery-timeline">
+            <div class="timeline-step {% if order.status in 'confirmed out_for_delivery delivered' %}active{% endif %}">
+                <div class="timeline-icon">✓</div>
+                <div class="timeline-content">
+                    <strong>Order Confirmed</strong>
+                    <p>{{ order.created_at|date:"d M, Y h:i A" }}</p>
+                </div>
+            </div>
+
+            <div class="timeline-step {% if order.status in 'out_for_delivery delivered' %}active{% endif %}">
+                <div class="timeline-icon">🚚</div>
+                <div class="timeline-content">
+                    <strong>Out for Delivery</strong>
+                    <p>
+                        {% if order.status == 'out_for_delivery' or order.status == 'delivered' %}
+                            In Progress
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-step {% if order.status == 'delivered' %}active{% endif %}">
+                <div class="timeline-icon">📦</div>
+                <div class="timeline-content">
+                    <strong>Delivered</strong>
+                    <p>Expected by {{ order.expected_delivery_date|date:"d M, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Back button -->
+    <div class="order-footer-actions">
+        <a href="{% url 'order_history' %}" class="btn btn-secondary">Back to Orders</a>
+        {% if order.status != 'delivered' and order.status != 'cancelled' %}
+        <a href="{% url 'track_order' order.id %}" class="btn btn-primary">Track Order</a>
+        {% endif %}
+    </div>
+{% if expected_date %}
+    <p><strong>Expected Delivery:</strong> {{ expected_date }}</p>
+{% endif %}
+</div>
+
+<style>
+/* -------- Page layout -------- */
+.order-page {
+    max-width: 960px;
+    margin: 2.5rem auto;
+    padding: 0 1rem 3rem;
+    background: #f4f6fb;
+    border-radius: 16px;
+}
+
+/* Card */
+.order-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1.75rem 1.75rem 1.5rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+}
+
+/* Status card */
+.order-status-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #e9f8ec;
+    border-left: 5px solid #27ae60;
+}
+.status-icon {
+    font-size: 2rem;
+}
+.status-text h2 {
+    margin: 0;
+}
+.status-subtitle {
+    margin: 0.25rem 0 0;
+    font-weight: 600;
+}
+
+/* Header section */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.order-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #7f8c8d;
+    margin-bottom: 0.15rem;
+}
+.order-status-badge {
+    padding: 0.35rem 1.2rem;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.order-status-badge.delivered { background: #27ae60; }
+.order-status-badge.out-for-delivery { background: #3498db; }
+.order-status-badge.cancelled { background: #e74c3c; }
+.order-status-badge.pending { background: #f39c12; }
+
+.order-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem 1.5rem;
+}
+.text-strong { font-weight: 600; }
+.text-muted { color: #7f8c8d; }
+.text-success { color: #27ae60; }
+.text-warning { color: #e67e22; }
+.text-right { text-align: right; }
+
+.order-grid-2 {
+    display: grid;
+    grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
+    gap: 1.5rem;
+}
+@media (max-width: 768px) {
+    .order-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.section-title {
+    margin: 0 0 0.75rem;
+}
+
+/* Small two-column block */
+.two-cols {
+    display: flex;
+    gap: 2rem;
+}
+.two-cols > div { flex: 1; }
+
+.w-100 { width: 100%; }
+
+/* Table */
+.table-wrapper {
+    overflow-x: auto;
+}
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+.order-table thead {
+    background: #f0f2f7;
+}
+.order-table th,
+.order-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #e1e4eb;
+}
+.order-table th {
+    font-weight: 600;
+    text-align: left;
+}
+.order-table tfoot th {
+    border-bottom: none;
+}
+
+/* Color pill */
+.color-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.85rem;
+}
+
+/* Timeline */
+.delivery-timeline {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    padding: 10px 0 0;
+}
+.timeline-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    opacity: 0.4;
+}
+.timeline-step.active { opacity: 1; }
+.timeline-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 24px;
+    border: 3px solid #dee2e6;
+}
+.timeline-step.active .timeline-icon {
+    background: #28a745;
+    color: #fff;
+    border-color: #28a745;
+}
+.timeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 27px;
+    left: 50%;
+    width: 100%;
+    height: 3px;
+    background: #dee2e6;
+    z-index: -1;
+}
+.timeline-step.active:not(:last-child)::after {
+    background: #28a745;
+}
+.timeline-content strong {
+    display: block;
+    margin-bottom: 4px;
+}
+.timeline-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Bottom buttons */
+.order-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+@media (max-width: 600px) {
+    .order-footer-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+
+{% endblock %}

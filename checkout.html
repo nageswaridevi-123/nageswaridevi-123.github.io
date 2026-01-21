@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Paint System{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">Checkout</h1>
+
+<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
+    <div>
+        <form method="POST" id="checkoutForm">
+            {% csrf_token %}
+            
+            <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1rem;">Delivery Information</h2>
+                <div style="margin-bottom: 1rem;">
+                    <label><strong>Mobile:</strong></label>
+                    <input type="tel" value="{{ profile.mobile }}" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; background: #ecf0f1;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label><strong>Address:</strong></label>
+                    <textarea readonly style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-height: 80px; background: #ecf0f1;">{{ profile.address }}</textarea>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label><strong>Pincode:</strong></label>
+                    <input type="text" value="{{ profile.pincode }}" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; background: #ecf0f1;">
+                </div>
+            </div>
+
+<div class="mt-3">
+      <label><strong>Expected Delivery:</strong></label>
+      <div id="expected-delivery" style="margin-top: 0.5rem; font-weight: 600;">
+        {% if expected_delivery %}
+          {{ expected_delivery }}
+        {% else %}
+          Expected delivery will be shown here.
+        {% endif %}
+      </div>
+    </div>
+
+            <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1rem;">Payment Method</h2>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: flex; align-items: center; padding: 1rem; background: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+                        <input type="radio" name="payment_method" value="cod" checked style="margin-right: 1rem;">
+                        <div>
+                            <strong>Cash on Delivery</strong>
+                            <p style="color: #7f8c8d; font-size: 0.9rem; margin-top: 0.3rem;">Pay when you receive</p>
+                        </div>
+                    </label>
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; padding: 1rem; background: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+                        <input type="radio" name="payment_method" value="online" style="margin-right: 1rem;">
+                        <div>
+                            <strong>Online Payment (Dummy)</strong>
+                            <p style="color: #7f8c8d; font-size: 0.9rem; margin-top: 0.3rem;">UPI / Card / Net Banking</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; font-size: 1.2rem;">Place Order</button>
+        </form>
+    </div>
+
+    <div>
+        <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+            {% for item in cart_items %}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #ddd;">
+                <div>
+                    <p><strong>{{ item.product.name }}</strong></p>
+                    <p style="color: #7f8c8d; font-size: 0.9rem;">{{ item.product.size }} × {{ item.quantity }}</p>
+                </div>
+                <p style="font-weight: bold;">₹{{ item.get_total_price }}</p>
+
+            </div>
+            {% endfor %}
+
+            <div style="border-top: 2px solid #ddd; padding-top: 1rem; margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Subtotal:</span>
+                    <span>₹{{ total }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span>Delivery:</span>
+                    <span style="color: #27ae60;">FREE</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold;">
+                    <span>Total:</span>
+                    <span style="color: #27ae60;">₹{{ total }}</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    if (paymentMethod === 'online') {
+        e.preventDefault();
+        if (confirm('This is a dummy payment. Proceed with order?')) {
+            this.submit();
+        }
+    }
+});
+</script>
+{% endblock %}

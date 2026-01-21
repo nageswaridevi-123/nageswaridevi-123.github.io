@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Paint System{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <h1 style="margin-bottom: 2rem;">My Profile</h1>
+
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 1.5rem;">Account Information</h2>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 2rem;">
+            <p style="color: #7f8c8d;"><strong>Username:</strong></p>
+            <p>{{ user.username }}</p>
+            
+            <p style="color: #7f8c8d;"><strong>Email:</strong></p>
+            <p>{{ user.email }}</p>
+            
+            <p style="color: #7f8c8d;"><strong>Member Since:</strong></p>
+            <p>{{ user.date_joined|date:"d M Y" }}</p>
+        </div>
+    </div>
+
+    <form method="POST" style="background: #f8f9fa; padding: 2rem; border-radius: 10px;">
+        {% csrf_token %}
+        <h2 style="margin-bottom: 1.5rem;">Contact & Delivery Information</h2>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Mobile Number:</strong></label>
+            <input type="tel" name="mobile" value="{{ profile.mobile }}" required 
+                   style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Delivery Address:</strong></label>
+            <textarea name="address" required rows="4"
+                      style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem; resize: vertical;">{{ profile.address }}</textarea>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label><strong>Pincode:</strong></label>
+            <input type="text" name="pincode" value="{{ profile.pincode }}" required 
+                   style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-top: 0.5rem;">
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; font-size: 1.1rem;">Update Profile</button>
+    </form>
+</div>
+{% endblock %}

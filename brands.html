@@ -1,0 +1,53 @@
+<!-- paint_app/templates/brands.html -->
+{% extends 'base.html' %}
+
+{% block title %}Paint Brands{% endblock %}
+
+{% block content %}
+<h1>Our Paint Brands</h1>
+<p style="color: #7f8c8d; margin-bottom: 2rem;">Explore premium paint brands and their featured products</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+    {% for item in brands_with_featured %}
+    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 1.5rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <!-- Brand Header -->
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            {% if item.brand.logo %}
+                <img src="{{ item.brand.logo.url }}" alt="{{ item.brand.name }}" style="max-width: 150px; height: auto; margin-bottom: 1rem;">
+            {% endif %}
+            <h2 style="margin: 0.5rem 0;">
+                <a href="{% url 'brand_detail' item.brand.id %}" style="color: #2c3e50; text-decoration: none;">
+                    {{ item.brand.name }}
+                </a>
+            </h2>
+            <p style="color: #7f8c8d; font-size: 0.9rem;">{{ item.brand.description }}</p>
+        </div>
+
+        <!-- Featured Products -->
+        {% if item.featured_products %}
+        <div style="border-top: 1px solid #ecf0f1; padding-top: 1rem;">
+            <h4 style="margin-bottom: 1rem; color: #f39c12;">⭐ Featured Products</h4>
+            <div style="display: grid; gap: 0.8rem;">
+                {% for product in item.featured_products %}
+                <div style="display: flex; gap: 1rem; align-items: center; padding: 0.5rem; background: #f8f9fa; border-radius: 5px;">
+                    <div style="width: 50px; height: 50px; background: {{ product.color_code }}; border-radius: 5px; border: 1px solid #ddd;"></div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: bold; margin: 0;">{{ product.name }}</p>
+                        <p style="color: #7f8c8d; font-size: 0.85rem; margin: 0;">{{ product.color_name }} - {{ product.size }}</p>
+                        <p style="color: #27ae60; font-weight: bold; margin: 0;">₹{{ product.price }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #95a5a6; font-style: italic;">No featured products yet</p>
+        {% endif %}
+
+        <a href="{% url 'brand_detail' item.brand.id %}" class="btn" style="width: 100%; text-align: center; margin-top: 1rem;">
+            View All Products →
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
